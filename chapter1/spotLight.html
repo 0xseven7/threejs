@@ -9,7 +9,8 @@
         overflow: hidden;
       }
     </style>
-  <script type="text/javascript" src="../three.js"></script>
+    <script src="three.js"></script>
+    <script src="https://cdn.bootcss.com/dat-gui/0.6.5/dat.gui.js"></script>
 </head>
 <body>
 
@@ -23,10 +24,9 @@
   var renderer = new THREE.WebGLRenderer();
   renderer.setClearColor(0xffffff, 1.0);
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMapEnabled = true;
+  renderer.shadowMap.enabled = true;
 
-  var axes = new THREE.AxesHelper(20);
-  scene.add(axes);
+  
   var planeGeometry = new THREE.PlaneGeometry (60, 20);
   var planeMaterial = new THREE.MeshLambertMaterial ({color: 0xffffff});
   var plane = new THREE.Mesh (planeGeometry, planeMaterial);

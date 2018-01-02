@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>directionLight</title>
+    <script type="text/javascript" src="../lib/three.js"></script>
+    <script type="text/javascript" src="../lib/stats.js"></script>
+    <script type="text/javascript" src="../lib/dat.gui.js"></script>
+</head>
+<body>
+
+<div id="webGL-output"></div>
+<div id="stats-output"></div>
+<script>
+  
+  var init = function () {
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(new THREE.Color(255, 255, 255, 1.0));
+    renderer.shadowMap.enabled = true;
+
+    var planeGemotry = new THREE.PlaneGeometry(60, 40);
+    var planeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+    var plane = new THREE.Mesh(planeGemotry, planeMaterial);
+
+    plane.position.set(0, 0, 0);
+    plane.rotation.x = -0.5 * Math.PI;
+    scene.add(plane);
+
+    var axes = new THREE.AxesHelper(20);
+    scene.add(axes);
+
+    var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+
+    scene.add(ambientLight);
+    
+    camera.position.x = 40;
+    camera.position.y = 60;
+    camera.position.z = 60;
+    camera.lookAt(scene.position);
+
+//    var render = function () {
+//    };
+//    render();
+    renderer.render(scene, camera);
+    document.getElementById('webGL-output').appendChild(renderer.domElement);
+  };
+  window.onload = init;
+
+</script>
+</body>
+</html>

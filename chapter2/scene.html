@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>scene</title>
+  <script src="../lib/three.js"></script>
+  <script src="../lib/dat.gui.js"></script>
+  <script type="text/javascript" src="../lib/stats.js"></script>
+</head>
+
+<body>
+
+<div id="webGL-output">
+
+</div>
+<div id="stats-output">
+
+</div>
+<script type="text/javascript">
+  var camera, scene;
+  var init = function () {
+    var stats = initStats();
+    scene = new THREE.Scene();
+    // 雾化
+    scene.fog = new THREE.Fog(0xffffff, 0.015, 100);
+    //
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    var renderer = new THREE.WebGLRenderer();
+
+    renderer.setClearColor(new THREE.Color(255, 255, 255, 1.0));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+
+    var planeGeometry = new THREE.PlaneGeometry(60, 40);
+    console.log(planeGeometry.parameters.width);
+    var planeMaterial = new THREE.MeshLambertMaterial({color: 0xaaaaaa});
+    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+    plane.receiveShadow = true;
+    scene.add(plane);
+// 聚光灯广元
+    var spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.x = 50;
+    spotLight.position.y = 50;
+    spotLight.position.z = 50;
+
+    spotLight.castShadow = true;
+    scene.add(spotLight);
+    
+    //环境广元
+
+    camera.position.x = -50;
+    camera.position.y = 40;
+    camera.position.z = 50;
+    camera.lookAt(scene.position);
+    var render = function () {
+      stats.update();
+      scene.traverse(function (e) {
+        if (e instanceof THREE.Mesh && e !== plane) {
+          e.rotation.x += controllers.rotationSpeed;
+          e.rotation.y += controllers.rotationSpeed;
+          e.rotation.z += controllers.rotationSpeed;
+        }
+      });
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+    };
+    var step = 0;
+    var controllers = new function () {
+      this.rotationSpeed = 0.02;
+      this.numberOfObjects = scene.children.length;
+      this.addCube = function () {
+        var cubeSize = Math.ceil(Math.random() * 3);
+        var cubeGeoMetry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+        var cubeMaterial = new THREE.MeshLambertMaterial({
+          color: Math.random() * 0xffffff
+        });
+        var cube = new THREE.Mesh(cubeGeoMetry, cubeMaterial);
+        cube.castShadow = true;
+
+        cube.position.x = -30 + Math.round(Math.random() * planeGeometry.parameters.width);
+        cube.position.y = Math.round(Math.random() * 5);
+        cube.position.z = -20 + Math.round(Math.random() * planeGeometry.parameters.height);
+
+        scene.add(cube);
+        this.numberOfObjects = scene.children.length;
+      };
+
+      this.removeCube = function () {
+        var allChildren = scene.children;
+        var lastChild = allChildren[allChildren.length - 1];
+        if (lastChild instanceof THREE.Mesh) {
+          scene.remove(lastChild);
+          this.numberOfObjects = scene.children.length;
+        }
+      };
+    };
+
+    var gui = new dat.GUI();
+    gui.add(controllers, 'rotationSpeed', 0, 0.5);
+    gui.add(controllers, 'addCube');
+    gui.add(controllers, 'removeCube');
+    document.getElementById('webGL-output').appendChild(renderer.domElement);
+    render();
+    var onResize = function () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    eventHandler.addHandler(window, 'resize', onResize);
+  };
+
+  var initStats = function () {
+    var stats = new Stats();
+    stats.setMode(0);
+    var element = stats.domElement;
+    element.style.position = 'absolute';
+    element.style.left = '100px';
+    element.style.top = '100px';
+    document.getElementById('stats-output').appendChild(element);
+    return stats;
+  };
+  var eventHandler = {
+    addHandler: function (element, type, handler) {
+      if (element.addEventListener) {
+        element.addEventListener(type, handler, false);
+      } else if (element.attachEvent) {
+        element.attachEvent('on' + type, handler);
+      } else {
+        element['on' + type] = handler;
+      }
+    }
+  };
+  window.onload = init;
+</script>
+
+</body>
+</html>
