@@ -20,11 +20,11 @@
 
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(new THREE.Color(255, 255, 255, 1.0));
+    renderer.setClearColor(new THREE.Color(255, 255, 255), 1.0);
     renderer.shadowMap.enabled = true;
 
     var planeGemotry = new THREE.PlaneGeometry(60, 40);
-    var planeMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+    var planeMaterial = new THREE.MeshLambertMaterial({color: 0xeeeeee});
     var plane = new THREE.Mesh(planeGemotry, planeMaterial);
 
     plane.position.set(0, 0, 0);
@@ -34,9 +34,20 @@
     var axes = new THREE.AxesHelper(20);
     scene.add(axes);
 
-    var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+    var spotLight = new THREE.SpotLight(0xff0000);
+    spotLight.position.set(20, 20, 20);
+    scene.add(spotLight);
 
-    scene.add(ambientLight);
+    var cubeGeometry = new THREE.BoxGeometry(2, 2, 2);
+    var Material = new THREE.MeshLambertMaterial({color: 0xeeeeee});
+    var cube = new THREE.Mesh(cubeGeometry, Material);
+    cube.position.set(2, 5, 2);
+    
+    var sphereGeometry = new THREE.SphereGeometry(2);
+    var sphere = new Mesh(sphereGeometry, Material);
+    
+    scene.add(cube);
+    scene.add(sphere);
     
     camera.position.x = 40;
     camera.position.y = 60;
