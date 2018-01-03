@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>depthMaterial</title>
+  <script type="text/javascript" src="../lib/stats.js"></script>
+  <script type="text/javascript" src="../lib/dat.gui.js"></script>
+  <script type="text/javascript" src="../lib/three.js"></script>
+</head>
+<body>
+<div id="output"></div>
+<script>
+var init = function () {
+  var scene = new THREE.Scene();
+  scene.overrideMaterial = new THREE.MeshDepthMaterial();
+  var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 10, 100);
+  var renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(new THREE.Color(0xffffff), 1.0);
+  renderer.shadowMap.enabled = true;
+
+  var basicMaterial = new THREE.MeshLambertMaterial({color: 0xff0000});
+
+  var planeGeo = new THREE.PlaneGeometry(60, 40);
+  var plane = new THREE.Mesh(planeGeo, basicMaterial);
+  plane.position.set(0, 0, 0);
+  plane.rotation.x = -0.5 * Math.PI;
+  scene.add(plane);
+  camera.position.set(20, 20, 20);
+  camera.lookAt(scene.position);
+
+  var output = document.getElementById('output');
+
+  var controllers = new function () {
+    this.numberOfObjects = scene.children.length;
+    this.rotationSpeed = 0.02;
+
+    this.addCube = function () {
+
+      var cubeSize = Math.ceil(3 + (Math.random() * 3));
+      var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+      var cubeMaterial = new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff});
+      var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      cube.castShadow = true;
+
+      // position the cube randomly in the scene
+      cube.position.x = -30 + Math.round((Math.random() * 60));
+      cube.position.y = Math.round((Math.random() * 10));
+      cube.position.z = -20 + Math.round((Math.random() * 40));
+
+      // add the cube to the scene
+      scene.add(cube);
+      this.numberOfObjects = scene.children.length;
+    };
+  };
+
+  var gui = new dat.GUI();
+  gui.add(controllers, 'addCube');
+
+  output.appendChild(renderer.domElement);
+  var i = 0;
+  while (i < 10) {
+    controllers.addCube();
+    i++;
+  }
+
+  var render = function () {
+    scene.traverse(function (e) {
+      if (e.geometry  instanceof THREE.BoxGeometry) {
+        e.rotation.x += controllers.rotationSpeed;
+        e.rotation.y += controllers.rotationSpeed;
+        e.rotation.z += controllers.rotationSpeed;
+      }
+    });
+    renderer.render(scene, camera);
+    requestAnimationFrame(render);
+  };
+  render();
+  output.appendChild(renderer.domElement);
+
+};
+window.onload = init;
+</script>
+</body>
+</html>
