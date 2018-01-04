@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>normalMaterial</title>
+  <script type="text/javascript" src="../lib/stats.js"></script>
+  <script type="text/javascript" src="../lib/three.js"></script>
+  <script type="text/javascript" src="../lib/dat.gui.js"></script>
+</head>
+
+<body>
+<div id="output">
+ </div>
+<script>
+  var init = function () {
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, .1, 1000);
+    camera.position.set(0, 70, 70);
+    camera.lookAt(scene.position);
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(new THREE.Color(0xffffff), 1.0);
+
+    var groundGeo = new THREE.PlaneGeometry(80, 40);
+
+    var groundMaterial = new THREE.MeshBasicMaterial({color: 0x777777});
+    var ground = new THREE.Mesh(groundGeo, groundMaterial);
+    ground.position.set(0, 0, 0);
+    ground.rotation.x = -0.5 * Math.PI;
+    scene.add(ground);
+    var sphereGeo = new THREE.SphereGeometry(10);
+    var cubeGeo = new THREE.BoxGeometry(10, 10, 10);
+    var planeGeo = new THREE.PlaneGeometry(10, 10);
+
+    var meshMaterial = new THREE.MeshNormalMaterial({color: 0x7777ff});
+    var sphere = new THREE.Mesh(sphereGeo, meshMaterial);
+    var cube = new THREE.Mesh(cubeGeo, meshMaterial);
+    var plane = new THREE.Mesh(planeGeo, meshMaterial);
+
+    plane.position.set(-20, 10, 0);
+    plane.rotation.z = -0.5 * Math.PI;
+    cube.position.set(0, 10, 0);
+    sphere.position.set(20, 10, 0);
+    scene.add(plane);
+    scene.add(cube);
+    scene.add(sphere);
+
+    var controllers = new function () {
+      this.rotationSpeed = 0.02;
+      this.opacity = meshMaterial.opacity;
+      this.visible = meshMaterial.visible;
+      this.transparent = meshMaterial.transparent;
+
+      this.side = meshMaterial.side;
+      this.wireframe = meshMaterial.wireframe;
+      this.wireframeLineWidth = meshMaterial.wireframeLinewidth;
+      this.selectedMesh = 'cube';
+      this.shadow = true;
+    };
+    document.getElementById('output').appendChild(renderer.domElement);
+    var render = function () {
+      cube.rotation.y += controllers.rotationSpeed;
+      sphere.rotation.y += controllers.rotationSpeed;
+      plane.rotation.y += controllers.rotationSpeed;
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+    };
+    render();
+    var gui = new dat.GUI();
+    var spGui = gui.addFold('Mesh');
+    spGui.add(controllers, 'opacity', 0, 1).onChange(function (e) {
+      meshMaterial.opacity = 0;
+    });
+    spGui.add(controllers, 'transprarent').onChange(function (e) {
+      meshMaterial.transparent = e;
+    });
+    spGui.add(controllers, 'visible').onChange(function (e) {
+      meshMaterial.visible = e;
+    });
+    spGui.add(controllers, 'side', ['front', 'back', 'double']).onChange(function (e) {
+      console.log(e);
+      switch (e) {
+        case 'front':
+          meshMaterial.side = THREE.FrontSide;
+          break;
+        case 'back':
+          meshMaterial.side = THREE.BackSide;
+          break;
+        case 'double':
+          meshMaterial.side = THREE.DoubleSide;
+          break;
+      }
+      spGui.add(controllers, 'shadow', ['flat', 'smooth']).onChange(function (e) {
+        switch (e) {
+          case 'flat':
+            meshMaterial.shading = THREE.FlatShading;
+            break;
+          case 'smooth':
+            meshMaterial.shading = THREE.SmoothShading;
+            break;
+        }
+      });
+      spGui.add(controllers, 'selectedMesh', ['cube', 'sphere', 'plane']).onChange(function (e) {
+        scene.remove()
+      })
+    });
+  };
+
+  window.onload = init;
+</script>
+</body>
+
+</html>
