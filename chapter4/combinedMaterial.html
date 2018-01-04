@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>联合材质</title>
+  <script type="text/javascript" src="../lib/stats.js"></script>
+  <script type="text/javascript" src="../lib/three.js"></script>
+  <script type="text/javascript" src="../lib/dat.gui.js"></script>
+</head>
+<body>
+<div id="output">
+
+</div>
+<script>
+  var init = function () {
+    var scene = new THREE.Scene();
+//    scene.overrideMaterial = new THREE.MeshDepthMaterial();
+    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setClearColor(new THREE.Color(0xffffff), 1.0);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+
+
+    var colorMetarial = new THREE.MeshLambertMaterial({
+      color: 0xaaaaaa,
+      transparent: true,
+      blending: THREE.MultiplyBlending
+    });
+    var depthMaterial = new THREE.MeshDepthMaterial();
+
+    var planeGeometry = new THREE.PlaneGeometry(60, 40);
+    var plane = new THREE.Mesh(planeGeometry, colorMetarial);
+    plane.position.set(0, 0, 0);
+    plane.rotation.x = -0.5 * Math.PI;
+    scene.add(plane);
+    var axes = new THREE.AxesHelper(20);
+    scene.add(axes);
+
+//    var spotLight = new THREE.SpotLight(0xffff00);
+//    spotLight.position.set(0, 50, 0);
+//    scene.add(spotLight);
+    console.log(plane);
+    camera.position.set(10, 10, 10);
+    camera.lookAt(scene.position);
+    var render = function () {
+      scene.traverse(function (e) {
+        if (e.geometry instanceof THREE.BoxGeometry) {
+          console.log(e.geometry);
+          e.rotation.x += controllers.rotationSpeed;
+          e.rotation.y += controllers.rotationSpeed;
+          e.rotation.z += controllers.rotationSpeed;
+        }
+      });
+      requestAnimationFrame(render);
+      renderer.render(scene, camera);
+    };
+    
+    var controllers = new function () {
+      this.rotationSpeed = 0.02;
+      this.numberOfObjects = scene.children.length;
+      this.addCube = function () {
+        colorMetarial.color = new THREE.Color(0xffffff * Math.random());
+        
+        var cubeGeometry = new THREE.BoxGeometry(2, 2);
+        var cube = new THREE.SceneUtils.createMultiMaterialObject(cubeGeometry, [colorMetarial, depthMaterial]);
+        cube.children[1].scale.set(0.99, 0.99, 0.99);
+        cube.name = 'cube-' + this.numberOfObjects;
+        cube.position.x = -30 + Math.ceil(60 * Math.random());
+        cube.position.y = 2 + Math.ceil(5 * Math.random());
+        cube.position.z = -20 + Math.ceil(40 * Math.random());
+        scene.add(cube);
+        this.numberOfObjects = scene.children.length;
+      };
+      this.removeCube = function () {
+        var objs = scene.children;
+        var lastObj = objs[objs.length - 1];
+        if (lastObj instanceof THREE.Mesh) {
+          scene.remove(lastObj);
+        }
+        this.numberOfObjects = scene.children.length;
+      };
+      
+    };
+    var i = 0;
+    while (i < 10) {
+      controllers.addCube();
+      i++;
+    }
+
+    render();
+    document.getElementById('output').appendChild(renderer.domElement);
+
+    var gui = new dat.GUI();
+    gui.add(controllers, 'addCube');
+    gui.add(controllers, 'removeCube');
+    gui.add(controllers, 'rotationSpeed', 0, 1);
+  };
+  window.onload = init;
+</script>
+</body>
+</html>
